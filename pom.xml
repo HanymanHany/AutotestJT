@@ -2,11 +2,20 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.example</groupId>
+    <groupId>autotests</groupId>
     <artifactId>AutotestJT</artifactId>
     <version>1.0-SNAPSHOT</version>
-
+    <properties>
+        <allure.version>2.13.1</allure.version>
+        <allure.results.directory>/src/test/reports/allure-results</allure.results.directory>
+        <allure.reports.directory>/src/test/reports/allure-reports</allure.reports.directory>
+    </properties>
     <dependencies>
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-testng</artifactId>
+            <version>${allure.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
@@ -55,6 +64,15 @@
                 <configuration>
                     <source>8</source>
                     <target>8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-maven</artifactId>
+                <version>2.10.0</version>
+                <configuration>
+                    <resultsDirectory>${allure.results.directory}</resultsDirectory>
+                    <reportDirectory>${allure.reports.directory}</reportDirectory>
                 </configuration>
             </plugin>
         </plugins>

@@ -2,8 +2,7 @@ package TestPage;
 
 import Helpers.Helper;
 
-import TestPageLocator.Common.PageAuth;
-import TestPageLocator.Common.GeneralLocators;
+import TestPageLocator.Mail.MailLocators;
 
 import org.openqa.selenium.*;
 import org.openqa.selenium.logging.LogEntries;
@@ -17,42 +16,31 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.testng.Assert;
 import org.testng.ITestResult;
 import org.testng.annotations.*;
+import io.qameta.allure.Attachment;
+
+
+import java.io.File;
+import java.lang.reflect.Method;
 import java.util.*;
 
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class EnvContainer {
-    public static String URL, Pass, Login, BrowserType, PathDriver,Headless;
+    public static String PathDriver,Headless;
     public static WebDriver Driver;
-    protected static PageAuth authpage;
     public static Helper _ctx;
-    public static GeneralLocators pagecommon;
+    public static MailLocators pagecommon;
 
     @BeforeSuite
-    @Parameters({"browsername","headless", "pathdriver", "url", "username", "password"})
-    public void suiteSetUp(String browserType,String headless, String pathDriver, String url, String username,
-            String password) throws Exception {
-
-        if (System.getProperty("url") != null) {
-            url = System.getProperty("url");
-        }
+    @Parameters({"browsername","headless", "pathdriver"})
+    public void suiteSetUp(String browserType,String headless, String pathDriver) throws Exception {
         Headless=headless;
-        Pass = password;
-        Login = username;
-        BrowserType = browserType;
         PathDriver = pathDriver;
         Driver = getDriverByName(browserType,Headless, pathDriver);
         _ctx = new Helper(Driver);
-        URL = url;
-        authpage = PageFactory.initElements(Driver, PageAuth.class);
-        pagecommon = PageFactory.initElements(Driver, GeneralLocators.class);
+        pagecommon = PageFactory.initElements(Driver, MailLocators.class);
 
         Driver.manage().window().setSize(new Dimension(1920, 1080));
-
-
-        //Deleted files on directory Logs
-       // _ctx.clearDirectory(InitData.PATH_TO_LOGS );
     }
 
 
@@ -62,17 +50,25 @@ public class EnvContainer {
     }
 
     @AfterMethod
-    public void testTearDown(ITestResult testResult) {
+
+    public void testTearDown(Method method, ITestResult result) {
+        if (! result.isSuccess()) {
+            makeScreenshot(result.getName());
+        }
         try {
-            String nameMethod = testResult.getName();
-            String nameClass = testResult.getTestClass().getName();
+            String nameMethod = result.getName();
+            String nameClass = result.getTestClass().getName();
             _ctx.writeAllLogInFile(Driver, nameMethod, nameClass);
             EnvContainer.interceptionJSonPage(Driver);
 
-            // EnvContainer.interceptionConsolePage(Driver);
         } catch (Exception ex) {
 
         }
+    }
+
+    @Attachment(value = "{0}", type = "image/png")
+    public byte[] makeScreenshot(String nametest) {
+        return ((TakesScreenshot) Driver).getScreenshotAs(OutputType.BYTES);
     }
 
 
@@ -83,18 +79,9 @@ public class EnvContainer {
                 System.setProperty("webdriver.chrome.driver", pathDriver);
                 System.setProperty("webdriver.chrome.verboseLogging", "false");
                 System.setProperty("webdriver.chrome.args", "--disable-logging");
-                System.setProperty("webdriver.chrome.silentOutput", "true");
-                Logger.getLogger("org.openqa.selenium").setLevel(Level.OFF); // it
-
-                ChromeOptions options = new ChromeOptions();
-                options.addArguments("--log-level=OFF");
-                options.addArguments("--silent");
-
-                options.setExperimentalOption("useAutomationExtension", false);
-                options.addArguments("--proxy-server='direct://'");
-                options.addArguments("--proxy-bypass-list=*");
 
                 DesiredCapabilities capabilities = DesiredCapabilities.chrome();
+                ChromeOptions options = new ChromeOptions();
                 capabilities.setCapability(ChromeOptions.CAPABILITY, options);
                 if (Headless.equals("yes")) {
                     options.setHeadless(true);
@@ -104,8 +91,6 @@ public class EnvContainer {
                     options.addArguments("--disable-extensions");
 
                 }
-
-              //  options.setExperimentalOption("prefs", chromePrefs);
                 LoggingPreferences logPrefs = new LoggingPreferences();
                 logPrefs.enable(LogType.PERFORMANCE, Level.ALL);
                 options.setCapability("goog:loggingPrefs", logPrefs);

@@ -10,7 +10,6 @@ import org.openqa.selenium.interactions.Action;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
-import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
@@ -21,7 +20,6 @@ public class Helper {
     private WebElement _current;
 
 	 public static int TimeoutElement = 2;
-	 public static int TimeoutCheckpoint = 10;
 	 
     /**  ------------ The new age helper ---------------- 
      * 
@@ -77,75 +75,34 @@ public class Helper {
 
     }
     public Helper clear() {
-        _current.clear();
+        clear(_current, _driver);
         return this;
     }
+    public static void clear(WebElement element, WebDriver driver) {
+        Actions navigator = new Actions(driver);
+            navigator.click(element) //
+                    .sendKeys(Keys.HOME) //
+                    /* */.keyDown(Keys.SHIFT) //
+                    /*     */.sendKeys(Keys.END) //
+                    /* */.keyUp(Keys.SHIFT) //
+                    .sendKeys(Keys.BACK_SPACE).build().perform();
 
-
-    public Helper doubleClickAndSetText(String value) {
-        final Actions navigator = new Actions(_driver);
-        navigator.doubleClick(_current).sendKeys(value).perform();
-        return this;
     }
 
     public Helper setValue(String value) {
 		 waitUntilConditions(_current, TimeoutElement, _driver);
-        clear();
+        //clear();
         _current.sendKeys(value);
         return this;
     }
 
-    public Helper tab() {
-        _current.sendKeys(Keys.TAB);
-        return this;
-    }
-    public Helper pressKey(String combination) {
-        Actions navigator = new Actions(_driver);
-        navigator.sendKeys(_current,combination).perform();
-        return this;
-    }
-
-    public String getCssValue(String value) {
-        return _current.getCssValue(value);
-    }
     public String getText() {
         return _current.getText();
-    }
-
-    public Helper scrollToElement(){
-        //final Actions builder = new Actions(_driver);
-        ((JavascriptExecutor)_driver).executeScript("arguments[0].scrollIntoView({block:\"center\"});", _current);
-        return  this;
     }
 
     public Helper moveTo() {
         final Actions navigator = new Actions(_driver);
         navigator.moveToElement(_current).perform();
-        return this;
-    }
-
-
-    public Helper dragAndDropByCoordinate(int x, int y) throws InterruptedException {
-        final Actions builder = new Actions(_driver);
-        builder.moveToElement(_current).clickAndHold(_current).moveByOffset(x,y).pause(1000).moveByOffset(x,y).release(_current).build().perform();
-        return this;
-    }
-
-    public Helper dragAndDropByCoordinateOneTouch(int x, int y) throws InterruptedException {
-        final Actions builder = new Actions(_driver);
-        builder.moveToElement(_current).clickAndHold(_current).moveByOffset(x,y).release(_current).build().perform();
-        return this;
-    }
-
-    public Helper keyTab() {
-        Actions builder = new Actions(_driver);
-        builder.sendKeys(_current, Keys.TAB).build().perform();
-        return this;
-    }
-    public Helper mouseAct() {
-        Actions builder = new Actions(_driver);
-        builder.sendKeys(_current, Keys.RETURN).build().perform();
-        //_current.sendKeys(Keys.ENTER);
         return this;
     }
 
@@ -157,14 +114,8 @@ public class Helper {
 
     public Helper click() {
 		  waitUntilConditions(_current, TimeoutElement, _driver);
-		  this.scrollToElement();
         Actions navigator = new Actions(_driver);
-        navigator.click(_current).perform();
-        return this;
-    }
-
-    public Helper waitJquery() {
-        waitUpdate(_driver);
+        navigator.click(_current).build().perform();
         return this;
     }
 
@@ -187,30 +138,6 @@ public class Helper {
         Action mouseoverAndClick = builder.build();
         mouseoverAndClick.perform();
     }
-
-    /**
-     *
-     * The method waits for the completion of the request. Additionally, an explicit wait for an item 1 sec
-     */
-    public static void waitUpdate(WebDriver driver) {
-		 //log("wait jquery");
-        try {
-            WebDriverWait wait = new WebDriverWait(driver, TimeoutCheckpoint);
-            wait.until((ExpectedCondition<Boolean>) wdriver -> ((JavascriptExecutor) driver)
-                    .executeScript("return((window.jQuery != null) && (jQuery.active === 0))")
-                    .equals(true));
-        } catch (WebDriverException exWebDriverException) {
-            Assert.fail("Timeout driver. Not enough time to display the item.");
-        }
-		  //log("wait jquery done");
-    }
-	public void waitUpdate() {
-		Helper.waitUpdate(_driver);
-	}
-
-
-
-
 
     public Helper waitSetup(int ms) {
         try {
@@ -275,27 +202,9 @@ public class Helper {
         new File(fullPathFile).delete();
     }
 
-    public void compareSizeFile(String PathFileAct, String PathFileExp,String msg) throws FileNotFoundException {
-        String fullPathFileAct = getAbsPath(PathFileAct);
-        String fullPathFileExp = getAbsPath(PathFileExp);
-
-        exists(fullPathFileAct);
-        exists(fullPathFileExp);
-
-        if(fullPathFileAct.length() != fullPathFileExp.length()){
-            int difference= fullPathFileExp.length()-fullPathFileAct.length();
-            if(difference<=5){
-
-            }else
-            {
-                Assert.assertEquals(fullPathFileAct.length(),fullPathFileExp.length(),msg);
-            }
-        }
-
-    }
-	 public static String getLogName(String fileName)
+    public static String getLogName(String fileName)
 	 {
-		 return "src/test/resources/.log";
+		 return "logs-js/"+ fileName +".log";
 	 }
     public static void writeFile(String fileName, String text) {
         //Определяем файл
@@ -324,15 +233,7 @@ public class Helper {
     public void writeAllLogInFile(WebDriver webDriver,String nameMethod,String nameClass) throws IOException {
 
         String filename = nameClass;
-	  
-//		  File file = new File(getLogName(filename));
-//		  if  (file.exists()) file.delete();
         logConsoleJs(webDriver,filename, nameMethod);
-//        //logNetwork(webDriver,filename);
-//        writeFile(filename, "\n--------------------START NETWORK LOG - "+nameMethod+"----------------------\n");
-//        logNetwork(webDriver,filename);
-//        writeFile(filename, "\n--------------------END NETWORK LOG - "+nameMethod+"------------------------\n");
-  //      ABrowserLogNetwork(webDriver,filename);
     }
 	public void logConsoleJs(WebDriver webDriver, String filename, String methodName) throws IOException {
 

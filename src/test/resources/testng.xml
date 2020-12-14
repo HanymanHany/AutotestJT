@@ -1,26 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 
-<suite name="TestOne" >
+<suite name="TestsSuite" >
 	<listeners>
         <listener class-name="Listener" />
         <listener class-name="SuiteListener" />
     </listeners>
-    <!-- ХРОМ   -->
+
     <parameter name="browsername" value="chrome"/>
     <parameter name="headless" value="yes"/>
     <parameter name="pathdriver" value="src/test/resources/chromedriver.exe"/>
 
-    <parameter name="url" value=""/>
-
-    <parameter name="username" value="admin"/>
-    <parameter name="password" value="admin"/>
-
-
-    <test name="Common" group-by-instances="true">
+    <test name="Mail" >
         <classes >
-            <class name = "TestPage.TestCommon.TestAddButton"/>
+            <class name = "TestPage.TestMail.TestMailRU"/>
+        </classes>
+    </test>
 
+    <test name="SocialNetwork" >
+        <classes >
+            <class name = "TestPage.TestSocialNetwork.TestOK"/>
         </classes>
     </test>
 
